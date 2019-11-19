@@ -1,7 +1,16 @@
 package com.wildcodeschool.wildandwizard.repository;
 
 import com.wildcodeschool.wildandwizard.entity.School;
+import com.wildcodeschool.wildandwizard.entity.Wizard;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SchoolRepository implements CrudDao<School> {
@@ -12,35 +21,159 @@ public class SchoolRepository implements CrudDao<School> {
 
     @Override
     public School save(School school) {
-
+    	
         // TODO Create
+        try {
+            Connection connection = DriverManager.getConnection(
+                    DB_URL, DB_USER, DB_PASSWORD
+            );
+            PreparedStatement statement = connection.prepareStatement(
+            		"INSERT INTO school (name, capacity, country) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            statement.setString(1, school.getName());
+            statement.setLong(2,   school.getCapacity());
+            statement.setString(3, school.getCountry());
+           
+
+            if (statement.executeUpdate() != 1) {
+                throw new SQLException("failed to insert data");
+            }
+
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+
+            if (generatedKeys.next()) {
+                Long id = generatedKeys.getLong(1);
+                school.setId(id);
+                return school;
+            } else {
+                throw new SQLException("failed to get inserted id");
+            }
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }    	
+        // TODO Create
+    	
         return null;
     }
 
     @Override
     public School findById(Long id) {
+    	
+        // TODO Create
+        try {
+            Connection connection = DriverManager.getConnection(
+                    DB_URL, DB_USER, DB_PASSWORD
+            );
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT * FROM school WHERE id = ?;"
+            );
+            statement.setLong(1, id);
+            ResultSet resultSet = statement.executeQuery();
 
-        // TODO Read one
+            if (resultSet.next()) {
+                String name     = resultSet.getString("name");
+                Long   capacity = resultSet.getLong("capacity");
+                String country  = resultSet.getString("country");
+                
+                return new School(id, name, capacity, country);
+            }
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }    	
+        // TODO Create
+    	
         return null;
     }
 
     @Override
     public List<School> findAll() {
+    	
+        // TODO Create
+        try {
+            Connection connection = DriverManager.getConnection(
+                    DB_URL, DB_USER, DB_PASSWORD
+            );
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT * FROM school;"
+            );
+            ResultSet resultSet = statement.executeQuery();
 
-        // TODO Read all
+            List<School> schools = new ArrayList<>();
+
+            while (resultSet.next()) {
+                Long   id       = resultSet.getLong("id");
+                String name     = resultSet.getString("name");
+                Long   capacity = resultSet.getLong("capacity");
+                String country  = resultSet.getString("country");                
+                
+
+                
+                schools.add(new School(id, name, capacity, country));
+            }
+            return schools;
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // TODO Create
+    	
         return null;
     }
 
     @Override
     public School update(School school) {
+    	
+        // TODO Create
+        try {
+             Connection connection = DriverManager.getConnection(
+                       DB_URL, DB_USER, DB_PASSWORD
+            		 );
+             PreparedStatement statement = connection.prepareStatement(
+                      "UPDATE school SET name=?, capacity=?, country=? WHERE id=?"
+            		 );
+             statement.setString(1, school.getName());
+             statement.setLong(2,   school.getCapacity());
+             statement.setString(3, school.getCountry());            
+             statement.setLong(4,   school.getId());
 
-        // TODO Update
+             if (statement.executeUpdate() != 1) {
+                throw new SQLException("failed to update data");
+             }
+             
+             return school;
+        } 
+        catch (SQLException e) {
+             e.printStackTrace();
+        }    	
+        // TODO Create
+    	
         return null;
     }
 
     @Override
     public void deleteById(Long id) {
+    	
+        // TODO Create
+        try {
+             Connection connection = DriverManager.getConnection(
+                       DB_URL, DB_USER, DB_PASSWORD
+            		 );
+             PreparedStatement statement = connection.prepareStatement(
+                       "DELETE FROM school WHERE id=?"
+            		 );
+             statement.setLong(1, id);
 
-        // TODO Delete
+             if (statement.executeUpdate() != 1) {
+                 throw new SQLException("failed to delete data");
+             }
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }    	
+        // TODO Create
+    	
     }
 }
